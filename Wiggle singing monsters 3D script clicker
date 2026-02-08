@@ -1,0 +1,148 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local autoFarming = false
+local IMAGE_ID = "101682020950269"
+
+local function forceClick(button)
+    local events = {"MouseButton1Click", "MouseButton1Down", "Activated", "TouchTap"}
+    for _, eventName in pairs(events) do
+        local signal = button[eventName]
+        if signal then
+            for _, connection in pairs(getconnections(signal)) do
+                connection:Fire()
+            end
+        end
+    end
+end
+
+local function scanAndClick()
+    for _, v in pairs(playerGui:GetDescendants()) do
+        if v:IsA("TextButton") or v:IsA("ImageButton") or v:IsA("TextLabel") then
+            if (string.find(v.Name, "Track") or (v:IsA("TextButton") and string.find(v.Text, "Track"))) and v.Visible then
+                if v:IsA("TextLabel") then
+                    local p = v:FindFirstAncestorWhichIsA("Button")
+                    if p then forceClick(p) end
+                else
+                    forceClick(v)
+                end
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if autoFarming then scanAndClick() end
+    end
+end)
+
+if playerGui:FindFirstChild("WiggleFarm") then playerGui.WiggleFarm:Destroy() end
+local gui = Instance.new("ScreenGui", playerGui)
+gui.Name = "WiggleFarm"
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 320, 0, 200)
+frame.Position = UDim2.new(0.5, -160, 0.5, -100)
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+frame.ClipsDescendants = true
+frame.Visible = false
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 15)
+
+local bgImage = Instance.new("ImageLabel", frame)
+bgImage.Size = UDim2.new(1, 0, 1, 0)
+bgImage.Image = "rbxassetid://" .. IMAGE_ID
+bgImage.ImageTransparency = 0.35 
+bgImage.ScaleType = Enum.ScaleType.Crop
+bgImage.ZIndex = 1
+
+local function createNeon(pos)
+    local l = Instance.new("Frame", frame)
+    l.Size = UDim2.new(0, 6, 0.75, 0)
+    l.Position = pos
+    l.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+    l.ZIndex = 10
+    Instance.new("UICorner", l)
+    local glow = Instance.new("UIStroke", l)
+    glow.Color = Color3.fromRGB(255, 255, 150)
+    glow.Thickness = 3
+end
+createNeon(UDim2.new(0, 8, 0.12, 0))
+createNeon(UDim2.new(1, -14, 0.12, 0))
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 50)
+title.Text = "WIGGLE CLICKER V6.6"
+title.Font = Enum.Font.GothamBlack
+title.TextColor3 = Color3.fromRGB(255, 215, 0)
+title.BackgroundTransparency = 1
+title.TextSize = 22
+title.ZIndex = 11
+
+local toggleBtn = Instance.new("ImageButton", frame)
+toggleBtn.Size = UDim2.new(0, 240, 0, 75)
+toggleBtn.Position = UDim2.new(0.5, -120, 0.35, 0)
+toggleBtn.Image = "rbxassetid://" .. IMAGE_ID
+toggleBtn.ImageColor3 = Color3.fromRGB(150, 150, 150)
+toggleBtn.ScaleType = Enum.ScaleType.Crop
+toggleBtn.ZIndex = 12
+Instance.new("UICorner", toggleBtn)
+
+local btnText = Instance.new("TextLabel", toggleBtn)
+btnText.Size = UDim2.new(1, 0, 1, 0)
+btnText.BackgroundTransparency = 1
+btnText.Text = "START FARMING"
+btnText.Font = Enum.Font.GothamBlack
+btnText.TextColor3 = Color3.new(1,1,1)
+btnText.TextScaled = true
+btnText.ZIndex = 13
+local textStroke = Instance.new("UIStroke", btnText)
+textStroke.Thickness = 2
+
+local btnStroke = Instance.new("UIStroke", toggleBtn)
+btnStroke.Color = Color3.fromRGB(255, 215, 0)
+btnStroke.Thickness = 3
+
+local openBtn = Instance.new("TextButton", gui)
+openBtn.Size = UDim2.new(0, 70, 0, 70)
+openBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
+openBtn.Text = "🐾"
+openBtn.TextSize = 35
+openBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1,0)
+
+local closeBtn = Instance.new("TextButton", frame)
+closeBtn.Size = UDim2.new(0, 100, 0, 30)
+closeBtn.Position = UDim2.new(0.5, -50, 0.82, 0)
+closeBtn.Text = "[ HIDE ]"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.BackgroundTransparency = 1
+closeBtn.ZIndex = 14
+
+toggleBtn.MouseButton1Click:Connect(function()
+    autoFarming = not autoFarming
+    btnText.Text = autoFarming and "FARMING ACTIVE" or "START FARMING"
+    toggleBtn.ImageColor3 = autoFarming and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(150, 150, 150)
+    btnStroke.Color = autoFarming and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 215, 0)
+end)
+
+openBtn.MouseButton1Click:Connect(function() frame.Visible = true openBtn.Visible = false end)
+closeBtn.MouseButton1Click:Connect(function() frame.Visible = false openBtn.Visible = true end)
+
+local dragging, dragStart, startPos
+frame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true dragStart = input.Position startPos = frame.Position
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.Touch then
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input) dragging = false end)
