@@ -75,7 +75,7 @@ createNeon(UDim2.new(1, -14, 0.12, 0))
 
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, 0, 0, 50)
-title.Text = "WIGGLE CLICKER V6.7"
+title.Text = "WIGGLE CLICKER V7.4"
 title.Font = Enum.Font.GothamBlack
 title.TextColor3 = Color3.fromRGB(255, 215, 0)
 title.BackgroundTransparency = 1
@@ -110,6 +110,7 @@ openBtn.Size = UDim2.new(0, 75, 0, 75)
 openBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
 openBtn.Image = "rbxassetid://" .. IMAGE_ID
 openBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+openBtn.ZIndex = 20
 Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1,0)
 Instance.new("UIStroke", openBtn).Thickness = 3
 
@@ -122,6 +123,31 @@ closeBtn.TextColor3 = Color3.new(1, 1, 1)
 closeBtn.BackgroundTransparency = 1
 closeBtn.ZIndex = 14
 
+local function makeDraggable(obj)
+    local dragging, dragStart, startPos
+    obj.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = obj.Position
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+            local delta = input.Position - dragStart
+            obj.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+end
+
+makeDraggable(frame)
+makeDraggable(openBtn)
+
 toggleBtn.MouseButton1Click:Connect(function()
     autoFarming = not autoFarming
     btnText.Text = autoFarming and "FARMING ACTIVE" or "START FARMING"
@@ -129,19 +155,12 @@ toggleBtn.MouseButton1Click:Connect(function()
     btnStroke.Color = autoFarming and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 215, 0)
 end)
 
-openBtn.MouseButton1Click:Connect(function() frame.Visible = true openBtn.Visible = false end)
-closeBtn.MouseButton1Click:Connect(function() frame.Visible = false openBtn.Visible = true end)
+openBtn.MouseButton1Click:Connect(function()
+    frame.Visible = true
+    openBtn.Visible = false
+end)
 
-local dragging, dragStart, startPos
-frame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true dragStart = input.Position startPos = frame.Position
-    end
+closeBtn.MouseButton1Click:Connect(function()
+    frame.Visible = false
+    openBtn.Visible = true
 end)
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.Touch then
-        local delta = input.Position - dragStart
-        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-UserInputService.InputEnded:Connect(function(input) dragging = false end)
