@@ -123,6 +123,7 @@ closeBtn.TextColor3 = Color3.new(1, 1, 1)
 closeBtn.BackgroundTransparency = 1
 closeBtn.ZIndex = 14
 
+-- DRAG LOGIC WITH SCREEN BOUNDS
 local function makeDraggable(obj)
     local dragging, dragStart, startPos
     obj.InputBegan:Connect(function(input)
@@ -135,7 +136,16 @@ local function makeDraggable(obj)
     UserInputService.InputChanged:Connect(function(input)
         if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
             local delta = input.Position - dragStart
-            obj.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            local newX = startPos.X.Offset + delta.X
+            local newY = startPos.Y.Offset + delta.Y
+            
+            -- CLAMPING LOGIC (keeps it on screen)
+            local screenWidth = gui.AbsoluteSize.X
+            local screenHeight = gui.AbsoluteSize.Y
+            newX = math.clamp(newX, 0, screenWidth - obj.AbsoluteSize.X)
+            newY = math.clamp(newY, 0, screenHeight - obj.AbsoluteSize.Y)
+            
+            obj.Position = UDim2.new(0, newX, 0, newY)
         end
     end)
     UserInputService.InputEnded:Connect(function(input)
