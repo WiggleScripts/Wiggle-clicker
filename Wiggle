@@ -70,44 +70,42 @@ title.TextSize = 18
 title.ZIndex = 2
 
 local scroll = Instance.new("ScrollingFrame", mainFrame)
-scroll.Size = UDim2.new(1, -20, 1, -90)
+scroll.Size = UDim2.new(1, -20, 1, -100)
 scroll.Position = UDim2.new(0, 10, 0, 55)
 scroll.BackgroundTransparency = 1
-scroll.CanvasSize = UDim2.new(0, 0, 0, 220)
-scroll.ScrollBarThickness = 2
+scroll.CanvasSize = UDim2.new(0, 0, 0, 200)
+scroll.ScrollBarThickness = 0
 scroll.ZIndex = 2
 
 local layout = Instance.new("UIListLayout", scroll)
-layout.Padding = UDim.new(0, 8)
+layout.Padding = UDim.new(0, 5)
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-local function makeBtn(txt, callback)
-    local b = Instance.new("TextButton", scroll)
-    b.Size = UDim2.new(0, 250, 0, 55)
-    b.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    b.Text = txt
-    b.Font = Enum.Font.GothamBold
-    b.TextColor3 = Color3.new(1, 1, 1)
-    b.TextSize = 15
-    b.ZIndex = 3
-    Instance.new("UICorner", b)
-    local s = Instance.new("UIStroke", b)
-    s.Color = Color3.fromRGB(255, 215, 0)
-    s.Thickness = 2
-    b.MouseButton1Click:Connect(function() callback(b, s) end)
-end
+local b = Instance.new("TextButton", scroll)
+b.Size = UDim2.new(0, 250, 0, 55)
+b.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+b.Text = "START CLICKER"
+b.Font = Enum.Font.GothamBold
+b.TextColor3 = Color3.new(1, 1, 1)
+b.TextSize = 15
+b.ZIndex = 3
+Instance.new("UICorner", b)
 
-makeBtn("START CLICKER", function(btn, strk)
+local s = Instance.new("UIStroke", b)
+s.Color = Color3.fromRGB(255, 215, 0)
+s.Thickness = 2
+
+b.MouseButton1Click:Connect(function()
     autoFarming = not autoFarming
-    btn.Text = autoFarming and "CLICKING: ON" or "START CLICKER"
-    strk.Color = autoFarming and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 215, 0)
+    b.Text = autoFarming and "CLICKING: ON" or "START CLICKER"
+    s.Color = autoFarming and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 215, 0)
 end)
 
 local note = Instance.new("TextLabel", scroll)
 note.Size = UDim2.new(0, 250, 0, 30)
 note.BackgroundTransparency = 1
-note.Text = "*Only works when morphed into a monster"
-note.Font = Enum.Font.GothamItalic
+note.Text = "Note: Only works when morphed into a monster"
+note.Font = Enum.Font.Gotham
 note.TextColor3 = Color3.fromRGB(200, 200, 200)
 note.TextSize = 11
 note.ZIndex = 3
