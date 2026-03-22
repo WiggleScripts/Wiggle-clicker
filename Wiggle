@@ -1,176 +1,142 @@
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local UIS = game:GetService("UserInputService")
+local lp = Players.LocalPlayer
+local playerGui = lp:WaitForChild("PlayerGui")
 
 local autoFarming = false
-local IMAGE_ID = "101682020950269"
+local IMAGE_ID = "rbxassetid://101682020950269"
 
 local function forceClick(button)
-    local events = {"MouseButton1Click", "MouseButton1Down", "Activated", "TouchTap"}
-    for _, eventName in pairs(events) do
-        local signal = button[eventName]
-        if signal then
-            for _, connection in pairs(getconnections(signal)) do
-                connection:Fire()
-            end
+    local signals = {"MouseButton1Click", "MouseButton1Down", "Activated", "TouchTap"}
+    for _, sigName in pairs(signals) do
+        local sig = button[sigName]
+        if sig then 
+            pcall(function()
+                for _, con in pairs(getconnections(sig)) do con:Fire() end 
+            end)
         end
     end
 end
 
-local function scanAndClick()
-    for _, v in pairs(playerGui:GetDescendants()) do
-        if v:IsA("TextButton") or v:IsA("ImageButton") or v:IsA("TextLabel") then
-            if (string.find(v.Name, "Track") or (v:IsA("TextButton") and string.find(v.Text, "Track"))) and v.Visible then
-                if v:IsA("TextLabel") then
-                    local p = v:FindFirstAncestorWhichIsA("Button")
-                    if p then forceClick(p) end
-                else
-                    forceClick(v)
+local function makeDraggable(obj, screenGui)
+    local dragging, dragStart, startPos
+    obj.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true dragStart = input.Position startPos = obj.AbsolutePosition
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            local screen = screenGui.AbsoluteSize
+            local objSize = obj.AbsoluteSize
+            local newX = math.clamp(startPos.X + delta.X, 0, screen.X - objSize.X)
+            local newY = math.clamp(startPos.Y + delta.Y, 0, screen.Y - objSize.Y)
+            obj.Position = UDim2.new(0, newX, 0, newY)
+        end
+    end)
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
+    end)
+end
+
+if playerGui:FindFirstChild("WiggleClicker") then playerGui.WiggleClicker:Destroy() end
+local gui = Instance.new("ScreenGui", playerGui)
+gui.Name = "WiggleClicker"
+gui.ResetOnSpawn = false
+
+local mainFrame = Instance.new("Frame", gui)
+mainFrame.Size = UDim2.new(0, 300, 0, 250)
+mainFrame.Position = UDim2.new(0.5, -150, 0.5, -125)
+mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+mainFrame.Visible = false
+Instance.new("UICorner", mainFrame)
+
+local bgImg = Instance.new("ImageLabel", mainFrame)
+bgImg.Size = UDim2.new(1, 0, 1, 0)
+bgImg.Image = IMAGE_ID
+bgImg.ImageTransparency = 0.8
+bgImg.BackgroundTransparency = 1
+bgImg.ScaleType = Enum.ScaleType.Crop
+Instance.new("UICorner", bgImg)
+
+local title = Instance.new("TextLabel", mainFrame)
+title.Size = UDim2.new(1, 0, 0, 50)
+title.Text = "WIGGLE CLICKER V9.9"
+title.Font = Enum.Font.GothamBlack
+title.TextColor3 = Color3.fromRGB(255, 215, 0)
+title.BackgroundTransparency = 1
+title.TextSize = 18
+title.ZIndex = 2
+
+local scroll = Instance.new("ScrollingFrame", mainFrame)
+scroll.Size = UDim2.new(1, -20, 1, -90)
+scroll.Position = UDim2.new(0, 10, 0, 55)
+scroll.BackgroundTransparency = 1
+scroll.CanvasSize = UDim2.new(0, 0, 0, 200)
+scroll.ScrollBarThickness = 2
+scroll.ZIndex = 2
+
+local layout = Instance.new("UIListLayout", scroll)
+layout.Padding = UDim.new(0, 12)
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+local function makeBtn(txt, callback)
+    local b = Instance.new("TextButton", scroll)
+    b.Size = UDim2.new(0, 250, 0, 55)
+    b.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    b.Text = txt
+    b.Font = Enum.Font.GothamBold
+    b.TextColor3 = Color3.new(1, 1, 1)
+    b.TextSize = 15
+    b.ZIndex = 3
+    Instance.new("UICorner", b)
+    local s = Instance.new("UIStroke", b)
+    s.Color = Color3.fromRGB(255, 215, 0)
+    s.Thickness = 2
+    b.MouseButton1Click:Connect(function() callback(b, s) end)
+end
+
+makeBtn("START CLICKER", function(btn, strk)
+    autoFarming = not autoFarming
+    btn.Text = autoFarming and "CLICKING: ON" or "START CLICKER"
+    strk.Color = autoFarming and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 215, 0)
+end)
+
+local openBtn = Instance.new("ImageButton", gui)
+openBtn.Size = UDim2.new(0, 65, 0, 65)
+openBtn.Position = UDim2.new(0.05, 0, 0.45, 0)
+openBtn.Image = IMAGE_ID
+openBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+Instance.new("UICorner", openBtn)
+
+local hide = Instance.new("TextButton", mainFrame)
+hide.Size = UDim2.new(0, 80, 0, 30)
+hide.Position = UDim2.new(0.5, -40, 0.88, 0)
+hide.Text = "CLOSE"
+hide.Font = Enum.Font.GothamBold
+hide.TextColor3 = Color3.new(0.7, 0.7, 0.7)
+hide.BackgroundTransparency = 1
+hide.ZIndex = 3
+
+makeDraggable(mainFrame, gui)
+makeDraggable(openBtn, gui)
+
+openBtn.MouseButton1Click:Connect(function() mainFrame.Visible = true openBtn.Visible = false end)
+hide.MouseButton1Click:Connect(function() mainFrame.Visible = false openBtn.Visible = true end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        if autoFarming then
+            for _, v in pairs(playerGui:GetDescendants()) do
+                if (v:IsA("TextButton") or v:IsA("ImageButton") or v:IsA("TextLabel")) and v.Visible then
+                    if v.Name:lower():find("track") or (v:IsA("TextLabel") and v.Text:lower():find("track")) then
+                        local t = v:IsA("TextLabel") and (v:FindFirstAncestorWhichIsA("GuiButton") or v.Parent) or v
+                        if t:IsA("GuiButton") then forceClick(t) end
+                    end
                 end
             end
         end
     end
-end
-
-task.spawn(function()
-    while task.wait(0.1) do
-        if autoFarming then scanAndClick() end
-    end
-end)
-
-if playerGui:FindFirstChild("WiggleFarm") then playerGui.WiggleFarm:Destroy() end
-local gui = Instance.new("ScreenGui", playerGui)
-gui.Name = "WiggleFarm"
-gui.ResetOnSpawn = false
-
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 320, 0, 200)
-frame.Position = UDim2.new(0.5, -160, 0.5, -100)
-frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-frame.ClipsDescendants = true
-frame.Visible = false
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 15)
-
-local bgImage = Instance.new("ImageLabel", frame)
-bgImage.Size = UDim2.new(1, 0, 1, 0)
-bgImage.Image = "rbxassetid://" .. IMAGE_ID
-bgImage.ImageTransparency = 0.35 
-bgImage.ScaleType = Enum.ScaleType.Crop
-bgImage.ZIndex = 1
-
-local function createNeon(pos)
-    local l = Instance.new("Frame", frame)
-    l.Size = UDim2.new(0, 6, 0.75, 0)
-    l.Position = pos
-    l.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
-    l.ZIndex = 10
-    Instance.new("UICorner", l)
-    local glow = Instance.new("UIStroke", l)
-    glow.Color = Color3.fromRGB(255, 255, 150)
-    glow.Thickness = 3
-end
-createNeon(UDim2.new(0, 8, 0.12, 0))
-createNeon(UDim2.new(1, -14, 0.12, 0))
-
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 50)
-title.Text = "WIGGLE CLICKER V7.4"
-title.Font = Enum.Font.GothamBlack
-title.TextColor3 = Color3.fromRGB(255, 215, 0)
-title.BackgroundTransparency = 1
-title.TextSize = 22
-title.ZIndex = 11
-
-local toggleBtn = Instance.new("ImageButton", frame)
-toggleBtn.Size = UDim2.new(0, 240, 0, 75)
-toggleBtn.Position = UDim2.new(0.5, -120, 0.35, 0)
-toggleBtn.Image = "rbxassetid://" .. IMAGE_ID
-toggleBtn.ImageColor3 = Color3.fromRGB(150, 150, 150)
-toggleBtn.ScaleType = Enum.ScaleType.Crop
-toggleBtn.ZIndex = 12
-Instance.new("UICorner", toggleBtn)
-
-local btnText = Instance.new("TextLabel", toggleBtn)
-btnText.Size = UDim2.new(1, 0, 1, 0)
-btnText.BackgroundTransparency = 1
-btnText.Text = "START FARMING"
-btnText.Font = Enum.Font.GothamBlack
-btnText.TextColor3 = Color3.new(1,1,1)
-btnText.TextScaled = true
-btnText.ZIndex = 13
-Instance.new("UIStroke", btnText).Thickness = 2
-
-local btnStroke = Instance.new("UIStroke", toggleBtn)
-btnStroke.Color = Color3.fromRGB(255, 215, 0)
-btnStroke.Thickness = 3
-
-local openBtn = Instance.new("ImageButton", gui)
-openBtn.Size = UDim2.new(0, 75, 0, 75)
-openBtn.Position = UDim2.new(0.05, 0, 0.4, 0)
-openBtn.Image = "rbxassetid://" .. IMAGE_ID
-openBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
-openBtn.ZIndex = 20
-Instance.new("UICorner", openBtn).CornerRadius = UDim.new(1,0)
-Instance.new("UIStroke", openBtn).Thickness = 3
-
-local closeBtn = Instance.new("TextButton", frame)
-closeBtn.Size = UDim2.new(0, 100, 0, 30)
-closeBtn.Position = UDim2.new(0.5, -50, 0.82, 0)
-closeBtn.Text = "[ HIDE ]"
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextColor3 = Color3.new(1, 1, 1)
-closeBtn.BackgroundTransparency = 1
-closeBtn.ZIndex = 14
-
--- DRAG LOGIC WITH SCREEN BOUNDS
-local function makeDraggable(obj)
-    local dragging, dragStart, startPos
-    obj.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = obj.Position
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
-            local delta = input.Position - dragStart
-            local newX = startPos.X.Offset + delta.X
-            local newY = startPos.Y.Offset + delta.Y
-            
-            -- CLAMPING LOGIC (keeps it on screen)
-            local screenWidth = gui.AbsoluteSize.X
-            local screenHeight = gui.AbsoluteSize.Y
-            newX = math.clamp(newX, 0, screenWidth - obj.AbsoluteSize.X)
-            newY = math.clamp(newY, 0, screenHeight - obj.AbsoluteSize.Y)
-            
-            obj.Position = UDim2.new(0, newX, 0, newY)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-end
-
-makeDraggable(frame)
-makeDraggable(openBtn)
-
-toggleBtn.MouseButton1Click:Connect(function()
-    autoFarming = not autoFarming
-    btnText.Text = autoFarming and "FARMING ACTIVE" or "START FARMING"
-    toggleBtn.ImageColor3 = autoFarming and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(150, 150, 150)
-    btnStroke.Color = autoFarming and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 215, 0)
-end)
-
-openBtn.MouseButton1Click:Connect(function()
-    frame.Visible = true
-    openBtn.Visible = false
-end)
-
-closeBtn.MouseButton1Click:Connect(function()
-    frame.Visible = false
-    openBtn.Visible = true
 end)
