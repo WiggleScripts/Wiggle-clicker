@@ -62,7 +62,7 @@ Instance.new("UICorner", bgImg)
 
 local title = Instance.new("TextLabel", mainFrame)
 title.Size = UDim2.new(1, 0, 0, 50)
-title.Text = "WIGGLE CLICKER V9.9"
+title.Text = "WIGGLE CLICKER V9.9.1"
 title.Font = Enum.Font.GothamBlack
 title.TextColor3 = Color3.fromRGB(255, 215, 0)
 title.BackgroundTransparency = 1
@@ -73,12 +73,12 @@ local scroll = Instance.new("ScrollingFrame", mainFrame)
 scroll.Size = UDim2.new(1, -20, 1, -90)
 scroll.Position = UDim2.new(0, 10, 0, 55)
 scroll.BackgroundTransparency = 1
-scroll.CanvasSize = UDim2.new(0, 0, 0, 200)
+scroll.CanvasSize = UDim2.new(0, 0, 0, 220)
 scroll.ScrollBarThickness = 2
 scroll.ZIndex = 2
 
 local layout = Instance.new("UIListLayout", scroll)
-layout.Padding = UDim.new(0, 12)
+layout.Padding = UDim.new(0, 8)
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 local function makeBtn(txt, callback)
@@ -102,6 +102,15 @@ makeBtn("START CLICKER", function(btn, strk)
     btn.Text = autoFarming and "CLICKING: ON" or "START CLICKER"
     strk.Color = autoFarming and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 215, 0)
 end)
+
+local note = Instance.new("TextLabel", scroll)
+note.Size = UDim2.new(0, 250, 0, 30)
+note.BackgroundTransparency = 1
+note.Text = "*Only works when morphed into a monster"
+note.Font = Enum.Font.GothamItalic
+note.TextColor3 = Color3.fromRGB(200, 200, 200)
+note.TextSize = 11
+note.ZIndex = 3
 
 local openBtn = Instance.new("ImageButton", gui)
 openBtn.Size = UDim2.new(0, 65, 0, 65)
